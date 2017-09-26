@@ -19,7 +19,6 @@
 */
 
 #include "KeyFrameDatabase.h"
-
 #include "KeyFrame.h"
 #include "Thirdparty/DBoW2/DBoW2/BowVector.h"
 
@@ -30,11 +29,6 @@ using namespace std;
 namespace ORB_SLAM2
 {
 
-    /**
-     * Initializes the KeyFrameDatabase with the given vocabulary
-     * 
-     * @param {superchill} - test
-     */
 KeyFrameDatabase::KeyFrameDatabase(ORBVocabulary *voc) : mpVoc(voc)
 {
     mvInvertedFile.resize(voc->size());
