@@ -13,6 +13,9 @@ build/
 # Visual Studio Code
 .vscode/
 
+# Ignore documentation artifacts
+docs/*
+
 # IDEA IDE
 .idea
 orb2.iml
