@@ -29,6 +29,16 @@ namespace ORB_SLAM2
 long unsigned int MapPoint::nNextId=0;
 mutex MapPoint::mGlobalMutex;
 
+
+
+/**
+ Initialize a map point with the worldposition (position in the map), the keyframe reference and the point map.
+
+ @param Pos - The world position of the map point.
+ @param pRefKF - The reference keyframe of the map point.
+ @param pMap - The point map of the map point.
+ @return Initialized map point.
+ */
 MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map* pMap):
     mnFirstKFid(pRefKF->mnId), mnFirstFrame(pRefKF->mnFrameId), nObs(0),mbTrackInView(false), mnTrackReferenceForFrame(0),
     mnLastFrameSeen(0), mnBALocalForKF(0), mnFuseCandidateForKF(0), mnLoopPointForKF(0), mnCorrectedByKF(0),
@@ -43,6 +53,17 @@ MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map* pMap):
     mnId=nNextId++;
 }
 
+
+/**
+ Initialize a map point with the worldposition (position in the map), the point map, the frame and the keypoint id in the given pFrame.
+     This method is used to create temporary keypoints.
+ 
+ @param Pos - The world position of the map point.
+ @param pMap - The point map of the map point.
+ @param pFrame - The frame of the keypoint.
+ @param idxF - The keypoint id in the given frame (pFrame).
+ @return Initialized map point.
+ */
 MapPoint::MapPoint(const cv::Mat &Pos, Map* pMap, Frame* pFrame, const int &idxF):
     mnFirstKFid(-1), mnFirstFrame(pFrame->mnId), nObs(0),mbTrackInView(false), mnTrackReferenceForFrame(0), mnLastFrameSeen(0),
     mnBALocalForKF(0), mnFuseCandidateForKF(0),mnLoopPointForKF(0), mnCorrectedByKF(0),
@@ -70,6 +91,12 @@ MapPoint::MapPoint(const cv::Mat &Pos, Map* pMap, Frame* pFrame, const int &idxF
     mnId=nNextId++;
 }
 
+
+/**
+ This method sets the world position of the map point.
+ 
+ @param Pos - The world position of the map point. This is also a matrix of 1 row by 3 columns with the x, y, z coordinates. 
+ */
 void MapPoint::SetWorldPos(const cv::Mat &Pos)
 {
     unique_lock<mutex> lock2(mGlobalMutex);
