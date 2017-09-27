@@ -1,7 +1,4 @@
-build/
-.vscode/
-run/
-
+# CMake build artifacts
 CMakeCache.txt
 CMakeFiles
 CMakeScripts
@@ -11,3 +8,14 @@ cmake_install.cmake
 install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
+build/
+
+# Visual Studio Code
+.vscode/
+
+# Ignore documentation artifacts
+docs/*
+
+# IDEA IDE
+.idea
+orb2.iml
