@@ -25,10 +25,18 @@
 namespace ORB_SLAM2
 {
 
+/**
+Constructor for Map, initializes mnMaxKFid && mnBigChangeIdx with 0
+*/
 Map::Map():mnMaxKFid(0),mnBigChangeIdx(0)
 {
 }
 
+/**
+This method adds KeyPoint pKF to mspKeyFrames
+
+@param KeyFrame pKF
+*/
 void Map::AddKeyFrame(KeyFrame *pKF)
 {
     unique_lock<mutex> lock(mMutexMap);
@@ -37,12 +45,22 @@ void Map::AddKeyFrame(KeyFrame *pKF)
         mnMaxKFid=pKF->mnId;
 }
 
+/**
+This method adds MapPoint pMP to mspMapPoints
+
+@param MapPoint pMP
+*/
 void Map::AddMapPoint(MapPoint *pMP)
 {
     unique_lock<mutex> lock(mMutexMap);
     mspMapPoints.insert(pMP);
 }
 
+/**
+This method removes the pointer of  MapPoint pMP in mspMapPoints
+
+@param MapPoint pMP
+*/
 void Map::EraseMapPoint(MapPoint *pMP)
 {
     unique_lock<mutex> lock(mMutexMap);
@@ -52,6 +70,11 @@ void Map::EraseMapPoint(MapPoint *pMP)
     // Delete the MapPoint
 }
 
+/**
+This method removes the pointer of  KeyFrame pMP in mspKeyFrames
+
+@param KeyFrame pKF
+*/
 void Map::EraseKeyFrame(KeyFrame *pKF)
 {
     unique_lock<mutex> lock(mMutexMap);
@@ -61,60 +84,108 @@ void Map::EraseKeyFrame(KeyFrame *pKF)
     // Delete the MapPoint
 }
 
+/**
+This method sets the mvpReferenceMapPoints as the supplied a vector of MapPoints
+
+@param vector<MapPoint>
+*/
 void Map::SetReferenceMapPoints(const vector<MapPoint *> &vpMPs)
 {
     unique_lock<mutex> lock(mMutexMap);
     mvpReferenceMapPoints = vpMPs;
 }
 
+/**
+Raises the mnBigChangeIdx (Big Change Index) by 1
+This index gets updated at a big change in the map (loop closure, global BA)
+*/
 void Map::InformNewBigChange()
 {
     unique_lock<mutex> lock(mMutexMap);
     mnBigChangeIdx++;
 }
 
+/**
+Retruns the mnBigChangeIdx  (Big Change Index)
+This index counts every big change in the map (loop closure, global BA)
+
+@return int mnBigChangeIdx
+*/
 int Map::GetLastBigChangeIdx()
 {
     unique_lock<mutex> lock(mMutexMap);
     return mnBigChangeIdx;
 }
 
+/**
+Retruns a vector containing all the KeyFrames
+
+@return vector<KeyFrame*>
+*/
 vector<KeyFrame*> Map::GetAllKeyFrames()
 {
     unique_lock<mutex> lock(mMutexMap);
     return vector<KeyFrame*>(mspKeyFrames.begin(),mspKeyFrames.end());
 }
 
+/**
+Retruns a vector containing all the MapPoints
+
+@return vector<MapPoint*>
+*/
 vector<MapPoint*> Map::GetAllMapPoints()
 {
     unique_lock<mutex> lock(mMutexMap);
     return vector<MapPoint*>(mspMapPoints.begin(),mspMapPoints.end());
 }
 
+/**
+Retruns the amount of MapPoints contained in the map
+
+@return long unsigned int
+*/
 long unsigned int Map::MapPointsInMap()
 {
     unique_lock<mutex> lock(mMutexMap);
     return mspMapPoints.size();
 }
 
+/**
+Retruns the amount of keyframes contained in the map
+
+@return long unsigned int
+*/
 long unsigned int Map::KeyFramesInMap()
 {
     unique_lock<mutex> lock(mMutexMap);
     return mspKeyFrames.size();
 }
 
+/**
+Retruns all the referenced MapPoints contained in the map
+
+@return vector<MapPoint*>
+*/
 vector<MapPoint*> Map::GetReferenceMapPoints()
 {
     unique_lock<mutex> lock(mMutexMap);
     return mvpReferenceMapPoints;
 }
 
+/**
+Return the highest id of a KeyFrame from the map
+
+@return mnMaxKFid
+*/
 long unsigned int Map::GetMaxKFid()
 {
     unique_lock<mutex> lock(mMutexMap);
     return mnMaxKFid;
 }
 
+/**
+Reinitializes the map, this removes all existing data.
+*/
 void Map::clear()
 {
     for(set<MapPoint*>::iterator sit=mspMapPoints.begin(), send=mspMapPoints.end(); sit!=send; sit++)
@@ -130,6 +201,12 @@ void Map::clear()
     mvpKeyFrameOrigins.clear();
 }
 
+/**
+Archives the map, this writes all existing data to Archive `ar`.
+
+@param Archive ar
+@param A const unsigned int version
+*/
 template<class Archive>
 void Map::serialize(Archive &ar, const unsigned int version)
 {
