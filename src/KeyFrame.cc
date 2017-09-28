@@ -25,7 +25,11 @@
 
 namespace ORB_SLAM2
 {
-
+	/*
+	KeyFrame constructor
+	@Param int nNextID: Id of the KeyFrame
+	@Return long
+	*/
 long unsigned int KeyFrame::nNextId=0;
 
 KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB):
@@ -56,6 +60,11 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB):
     SetPose(F.mTcw);    
 }
 
+
+/*
+Compute Bow of the Keyframe
+@Return void
+*/
 void KeyFrame::ComputeBoW()
 {
     if(mBowVec.empty() || mFeatVec.empty())
@@ -67,6 +76,13 @@ void KeyFrame::ComputeBoW()
     }
 }
 
+
+/*
+KeyFrame set pose
+@Param const cv::Mat: constant n-dimensional dense array class
+@Param &Tcw_: ????
+@Return void
+*/
 void KeyFrame::SetPose(const cv::Mat &Tcw_)
 {
     unique_lock<mutex> lock(mMutexPose);
@@ -83,24 +99,41 @@ void KeyFrame::SetPose(const cv::Mat &Tcw_)
     Cw = Twc*center;
 }
 
+
+/*
+KeyFrame get pose
+@Return cv::Mat
+*/
 cv::Mat KeyFrame::GetPose()
 {
     unique_lock<mutex> lock(mMutexPose);
     return Tcw.clone();
 }
 
+/*
+KeyFrame get pose inverse
+@Return cv::Mat
+*/
 cv::Mat KeyFrame::GetPoseInverse()
 {
     unique_lock<mutex> lock(mMutexPose);
     return Twc.clone();
 }
 
+/*
+Get the camera centre mono
+@Return cv::Mat
+*/
 cv::Mat KeyFrame::GetCameraCenter()
 {
     unique_lock<mutex> lock(mMutexPose);
     return Ow.clone();
 }
 
+/*
+Get the camera centre stereo
+@Return cv::Mat
+*/
 cv::Mat KeyFrame::GetStereoCenter()
 {
     unique_lock<mutex> lock(mMutexPose);
@@ -108,18 +141,32 @@ cv::Mat KeyFrame::GetStereoCenter()
 }
 
 
+/*
+Get the rotation of the KeyFrame
+@Return cv::Mat
+*/
 cv::Mat KeyFrame::GetRotation()
 {
     unique_lock<mutex> lock(mMutexPose);
     return Tcw.rowRange(0,3).colRange(0,3).clone();
 }
 
+/*
+Get translation of a KeyFrame
+@Return cv::Mat
+*/
 cv::Mat KeyFrame::GetTranslation()
 {
     unique_lock<mutex> lock(mMutexPose);
     return Tcw.rowRange(0,3).col(3).clone();
 }
 
+/*
+Connect one KeyFrame to another
+@Param Pointer KeyFrame 
+@Param constant int &weight: Adds a weight to each KeyFrame to determine how much they contribute to a calculation 
+@Return void
+*/
 void KeyFrame::AddConnection(KeyFrame *pKF, const int &weight)
 {
     {
@@ -135,6 +182,10 @@ void KeyFrame::AddConnection(KeyFrame *pKF, const int &weight)
     UpdateBestCovisibles();
 }
 
+/*
+Update the best 3D points of 2 frames that match
+@Return void
+*/
 void KeyFrame::UpdateBestCovisibles()
 {
     unique_lock<mutex> lock(mMutexConnections);
@@ -156,6 +207,10 @@ void KeyFrame::UpdateBestCovisibles()
     mvOrderedWeights = vector<int>(lWs.begin(), lWs.end());    
 }
 
+/*
+Returns a set of KeyFrame pointers that are connected to each other
+@Return set<KeyFrame*>
+*/
 set<KeyFrame*> KeyFrame::GetConnectedKeyFrames()
 {
     unique_lock<mutex> lock(mMutexConnections);
@@ -165,12 +220,21 @@ set<KeyFrame*> KeyFrame::GetConnectedKeyFrames()
     return s;
 }
 
+/*
+Returns a vector of the covisible KeyFrames
+@Return vector<KeyFrame*>
+*/
 vector<KeyFrame*> KeyFrame::GetVectorCovisibleKeyFrames()
 {
     unique_lock<mutex> lock(mMutexConnections);
     return mvpOrderedConnectedKeyFrames;
 }
 
+/*
+Returns a vector of the best covisible KeyFrames
+@Param const int &N: constant int number of neighbors
+@Return vector<KeyFrame*>
+*/
 vector<KeyFrame*> KeyFrame::GetBestCovisibilityKeyFrames(const int &N)
 {
     unique_lock<mutex> lock(mMutexConnections);
@@ -181,6 +245,11 @@ vector<KeyFrame*> KeyFrame::GetBestCovisibilityKeyFrames(const int &N)
 
 }
 
+/*
+Returns a vector of the covisible KeyFrames by weight
+@Param const int &w: constant int weight
+@Return vector<KeyFrame*>
+*/
 vector<KeyFrame*> KeyFrame::GetCovisiblesByWeight(const int &w)
 {
     unique_lock<mutex> lock(mMutexConnections);
@@ -198,6 +267,11 @@ vector<KeyFrame*> KeyFrame::GetCovisiblesByWeight(const int &w)
     }
 }
 
+/*
+Give the weight of a KeyFrame
+@Param KeyFrame *pKF: Insert KeyFrame pointer
+@Return weight of Keyframe 
+*/
 int KeyFrame::GetWeight(KeyFrame *pKF)
 {
     unique_lock<mutex> lock(mMutexConnections);
@@ -207,18 +281,34 @@ int KeyFrame::GetWeight(KeyFrame *pKF)
         return 0;
 }
 
+/*
+Add map point
+@Param MapPoint *pMP: Mappoint pointer
+@Param const size_t &idx: constant int, index of the mappoint
+@Return void
+*/
 void KeyFrame::AddMapPoint(MapPoint *pMP, const size_t &idx)
 {
     unique_lock<mutex> lock(mMutexFeatures);
     mvpMapPoints[idx]=pMP;
 }
 
+/*
+Erase the map point that are matched by mappoint index
+@Param const size_t &idx: constant int, index of the mappoint
+@Return void
+*/
 void KeyFrame::EraseMapPointMatch(const size_t &idx)
 {
     unique_lock<mutex> lock(mMutexFeatures);
     mvpMapPoints[idx]=static_cast<MapPoint*>(NULL);
 }
 
+/*
+Erase the map point that are matched by mappoint pointer
+@Param MapPoint *pMP: Mappoint pointer
+@Return void
+*/
 void KeyFrame::EraseMapPointMatch(MapPoint* pMP)
 {
     int idx = pMP->GetIndexInKeyFrame(this);
@@ -226,12 +316,21 @@ void KeyFrame::EraseMapPointMatch(MapPoint* pMP)
         mvpMapPoints[idx]=static_cast<MapPoint*>(NULL);
 }
 
-
+/*
+Replace the mappoint match
+@Param const size_t &idx: constant int, index of the mappoint 
+@Param MapPoint* pMP: Mappoint pointer
+@Return void
+*/
 void KeyFrame::ReplaceMapPointMatch(const size_t &idx, MapPoint* pMP)
 {
     mvpMapPoints[idx]=pMP;
 }
 
+/*
+Returns a set of mappoints pointers
+@Return set<MapPoint*>
+*/
 set<MapPoint*> KeyFrame::GetMapPoints()
 {
     unique_lock<mutex> lock(mMutexFeatures);
@@ -247,6 +346,11 @@ set<MapPoint*> KeyFrame::GetMapPoints()
     return s;
 }
 
+/*
+Return the total of mappoints that are tracked
+@Param const int &minObs: constant int minimale orbs
+@Return int
+*/
 int KeyFrame::TrackedMapPoints(const int &minObs)
 {
     unique_lock<mutex> lock(mMutexFeatures);
@@ -274,18 +378,31 @@ int KeyFrame::TrackedMapPoints(const int &minObs)
     return nPoints;
 }
 
+/*
+Returns a vector of mappoint that are matched
+@Return vector<KeyFrame*>
+*/
 vector<MapPoint*> KeyFrame::GetMapPointMatches()
 {
     unique_lock<mutex> lock(mMutexFeatures);
     return mvpMapPoints;
 }
 
+/*
+Return a mappoint pointer
+@Param const size_t &idx: constant int, index of the mappoint 
+@Return MapPoint* pointer
+*/
 MapPoint* KeyFrame::GetMapPoint(const size_t &idx)
 {
     unique_lock<mutex> lock(mMutexFeatures);
     return mvpMapPoints[idx];
 }
 
+/*
+Updates the connection between 2 KeyFrames
+@Return void
+*/
 void KeyFrame::UpdateConnections()
 {
     map<KeyFrame*,int> KFcounter;
@@ -378,18 +495,33 @@ void KeyFrame::UpdateConnections()
     }
 }
 
+/*
+Add a child KeyFrame to parent KeyFrame
+@Param KeyFrame *pKF: KeyFrame pointer
+@Return void
+*/
 void KeyFrame::AddChild(KeyFrame *pKF)
 {
     unique_lock<mutex> lockCon(mMutexConnections);
     mspChildrens.insert(pKF);
 }
 
+/*
+Erase a child Keyframe from parent KeyFrame
+@Param KeyFrame *pKF: KeyFrame pointer
+@Return void
+*/
 void KeyFrame::EraseChild(KeyFrame *pKF)
 {
     unique_lock<mutex> lockCon(mMutexConnections);
     mspChildrens.erase(pKF);
 }
 
+/*
+Change the parent KeyFrame
+@Param KeyFrame *pKF: KeyFrame pointer
+@Return void
+*/
 void KeyFrame::ChangeParent(KeyFrame *pKF)
 {
     unique_lock<mutex> lockCon(mMutexConnections);
@@ -397,24 +529,42 @@ void KeyFrame::ChangeParent(KeyFrame *pKF)
     pKF->AddChild(this);
 }
 
+/*
+Get all the childs KeyFrames
+@Return set<KeyFrame*> pointer
+*/
 set<KeyFrame*> KeyFrame::GetChilds()
 {
     unique_lock<mutex> lockCon(mMutexConnections);
     return mspChildrens;
 }
 
+/*
+Get parent KeyFrame
+@Return KeyFrame* pointer
+*/
 KeyFrame* KeyFrame::GetParent()
 {
     unique_lock<mutex> lockCon(mMutexConnections);
     return mpParent;
 }
 
+/*
+Check if KeyFrame has a child
+@Param KeyFrame *pKF: KeyFrame pointer
+@Return bool 
+*/
 bool KeyFrame::hasChild(KeyFrame *pKF)
 {
     unique_lock<mutex> lockCon(mMutexConnections);
     return mspChildrens.count(pKF);
 }
 
+/*
+
+@Param KeyFrame *pKF: KeyFrame pointer
+@Return void
+*/
 void KeyFrame::AddLoopEdge(KeyFrame *pKF)
 {
     unique_lock<mutex> lockCon(mMutexConnections);
@@ -422,18 +572,30 @@ void KeyFrame::AddLoopEdge(KeyFrame *pKF)
     mspLoopEdges.insert(pKF);
 }
 
+/*
+
+@Return set<KeyFrame*> pointers
+*/
 set<KeyFrame*> KeyFrame::GetLoopEdges()
 {
     unique_lock<mutex> lockCon(mMutexConnections);
     return mspLoopEdges;
 }
 
+/*
+Set a KeyFrame unerasable
+@Return void
+*/
 void KeyFrame::SetNotErase()
 {
     unique_lock<mutex> lock(mMutexConnections);
     mbNotErase = true;
 }
 
+/*
+Set a KeyFrame erasable
+@Return
+*/
 void KeyFrame::SetErase()
 {
     {
@@ -450,6 +612,10 @@ void KeyFrame::SetErase()
     }
 }
 
+/*
+Set Keyframe badflag on true
+@Return void
+*/
 void KeyFrame::SetBadFlag()
 {   
     {
@@ -544,12 +710,21 @@ void KeyFrame::SetBadFlag()
     mpKeyFrameDB->erase(this);
 }
 
+/*
+check if Keyframe is a badflag
+@Return bool
+*/
 bool KeyFrame::isBad()
 {
     unique_lock<mutex> lock(mMutexConnections);
     return mbBad;
 }
 
+/*
+Erase the connection between 2 connected KeyFrames
+@Param KeyFrame* pKF: KeyFrame pointer
+@Return void
+*/
 void KeyFrame::EraseConnection(KeyFrame* pKF)
 {
     bool bUpdate = false;
@@ -566,6 +741,13 @@ void KeyFrame::EraseConnection(KeyFrame* pKF)
         UpdateBestCovisibles();
 }
 
+/*
+Returns the features in an area
+@Param const float &x: x-coordinate
+@Param const float &y: y-coordinate
+@Param const float &r: radius
+@Return vector<size_t>
+*/
 vector<size_t> KeyFrame::GetFeaturesInArea(const float &x, const float &y, const float &r) const
 {
     vector<size_t> vIndices;
@@ -607,11 +789,22 @@ vector<size_t> KeyFrame::GetFeaturesInArea(const float &x, const float &y, const
     return vIndices;
 }
 
+/*
+Check if KeyFrame is in an image
+@Param const float &x: x-coordinate 
+@Param const float &y: y-coordinate 
+@Return bool
+*/
 bool KeyFrame::IsInImage(const float &x, const float &y) const
 {
     return (x>=mnMinX && x<mnMaxX && y>=mnMinY && y<mnMaxY);
 }
 
+/*
+?
+@Param int i
+@Return cv::Mat 
+*/
 cv::Mat KeyFrame::UnprojectStereo(int i)
 {
     const float z = mvDepth[i];
@@ -630,6 +823,11 @@ cv::Mat KeyFrame::UnprojectStereo(int i)
         return cv::Mat();
 }
 
+/*
+?
+@Param const int q
+@Return
+*/
 float KeyFrame::ComputeSceneMedianDepth(const int q)
 {
     vector<MapPoint*> vpMapPoints;
@@ -662,7 +860,9 @@ float KeyFrame::ComputeSceneMedianDepth(const int q)
     return vDepths[(vDepths.size()-1)/q];
 }
 
-// Default serializing Constructor
+/*
+Default serializing Constructor
+*/
 KeyFrame::KeyFrame():
     mnFrameId(0),  mTimeStamp(0.0), mnGridCols(FRAME_GRID_COLS), mnGridRows(FRAME_GRID_ROWS),
     mfGridElementWidthInv(0.0), mfGridElementHeightInv(0.0),
@@ -674,7 +874,16 @@ KeyFrame::KeyFrame():
     mnMinX(0), mnMinY(0), mnMaxX(0),
     mnMaxY(0)
 {}
+
+
 template<class Archive>
+
+/*
+?
+@Param Archive &ar 
+@Param const unsigned int version
+@Return void
+*/
 void KeyFrame::serialize(Archive &ar, const unsigned int version)
 {
     // no mutex needed vars
