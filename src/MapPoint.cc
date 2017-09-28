@@ -104,24 +104,47 @@ void MapPoint::SetWorldPos(const cv::Mat &Pos)
     Pos.copyTo(mWorldPos);
 }
 
+/**
+ This method gets the world position of the map point.
+
+ @return The world position of the map point.
+ */
 cv::Mat MapPoint::GetWorldPos()
 {
     unique_lock<mutex> lock(mMutexPos);
     return mWorldPos.clone();
 }
 
+    
+/**
+ This method gets the viewing angle of the map point from the camera center of the reference frame.
+
+ @return The viewing angle with a matrix of 1 row by 3 columns with the x, y, z coordinates.
+ */
 cv::Mat MapPoint::GetNormal()
 {
     unique_lock<mutex> lock(mMutexPos);
     return mNormalVector.clone();
 }
 
+/**
+ This method gets the reference keyframe of the map point.
+
+ @return The map point reference keyframe.
+ */
 KeyFrame* MapPoint::GetReferenceKeyFrame()
 {
     unique_lock<mutex> lock(mMutexFeatures);
     return mpRefKF;
 }
+    
+/**
+ This method sets the relationship between the keyframe and mappoint. The mappoint associates the keyframes in which it has been observed.
+ The number of observations is also updated. (nOrbs = Number of Observations)
 
+ @param pKF - The reference keyframe.
+ @param idx - The associated index in the keyframes.
+ */
 void MapPoint::AddObservation(KeyFrame* pKF, size_t idx)
 {
     unique_lock<mutex> lock(mMutexFeatures);
@@ -135,6 +158,14 @@ void MapPoint::AddObservation(KeyFrame* pKF, size_t idx)
         nObs++;
 }
 
+/**
+ This method removes the relationship between the keyframe and mappoint. The mappoint dissociates the keyframes in which it has been observed.
+ The number of observations has also been decreased. (nOrbs = Number of Observations)
+ 
+ If there are only two observations made, this mappoint will be erased.
+ 
+ @param pKF - The point keyframe.
+ */
 void MapPoint::EraseObservation(KeyFrame* pKF)
 {
     bool bBad=false;
@@ -163,18 +194,31 @@ void MapPoint::EraseObservation(KeyFrame* pKF)
         SetBadFlag();
 }
 
+/**
+ This method gets all the associated relationships of all the keyframes and mappoints.
+
+ @return The map of the associated keyframe and the mappoint index of the keyframe.
+ */
 map<KeyFrame*, size_t> MapPoint::GetObservations()
 {
     unique_lock<mutex> lock(mMutexFeatures);
     return mObservations;
 }
 
+/**
+ This method returns the number of keyframes that are observing the mappoint.
+
+ @return The number of observations.
+ */
 int MapPoint::Observations()
 {
     unique_lock<mutex> lock(mMutexFeatures);
     return nObs;
 }
 
+/**
+ This method removes all the associated pointer references off the map point in all the keyframes and it also erases the mappoint from the map.
+ */
 void MapPoint::SetBadFlag()
 {
     map<KeyFrame*,size_t> obs;
@@ -194,6 +238,11 @@ void MapPoint::SetBadFlag()
     mpMap->EraseMapPoint(this);
 }
 
+/**
+ This method gets the updated matched map point.
+
+ @return It returns the updated mappoint.
+ */
 MapPoint* MapPoint::GetReplaced()
 {
     unique_lock<mutex> lock1(mMutexFeatures);
@@ -201,6 +250,11 @@ MapPoint* MapPoint::GetReplaced()
     return mpReplaced;
 }
 
+/**
+ This method updates the matched map point and replaces it if is a duplicate.
+
+ @param pMP - The new map point which replaces the old map point.
+ */
 void MapPoint::Replace(MapPoint* pMP)
 {
     if(pMP->mnId==this->mnId)
@@ -241,6 +295,11 @@ void MapPoint::Replace(MapPoint* pMP)
     mpMap->EraseMapPoint(this);
 }
 
+/**
+ When a mappoint is bad there are no references to the mappoint available. If only two observations or less have been made the mappoint is declared as false, otherwise it is true.
+
+ @return A boolean if the mappoint is bad or not.
+ */
 bool MapPoint::isBad()
 {
     unique_lock<mutex> lock(mMutexFeatures);
@@ -248,24 +307,43 @@ bool MapPoint::isBad()
     return mbBad;
 }
 
+/**
+ If the map point is not declared as bad, the visibility is increased. The visibility is the number of times the mappoint is visible in all of the frames.
+
+ @param n - The number of tracking counters (default is 1).
+ */
 void MapPoint::IncreaseVisible(int n)
 {
     unique_lock<mutex> lock(mMutexFeatures);
     mnVisible+=n;
 }
 
+/**
+ The number of times the mappoint is found in all of the frames.
+
+ @param n - The number of times the mappoint is found (default is 1).
+ */
 void MapPoint::IncreaseFound(int n)
 {
     unique_lock<mutex> lock(mMutexFeatures);
     mnFound+=n;
 }
 
+/**
+ The ratio is the number times the mappoint has been found divided by the number of times it's visible.
+
+ @return The found ratio
+ */
 float MapPoint::GetFoundRatio()
 {
     unique_lock<mutex> lock(mMutexFeatures);
     return static_cast<float>(mnFound)/mnVisible;
 }
 
+/**
+ This method first retrieves all the observed descriptors from all the associated keyframes. Then it computes the distances between them. Finally also takes the descriptor with the least median distance to the rest.
+ The descriptor is a unique matrix which describes the map point. The matrix is 1 row and 32 columns.
+ */
 void MapPoint::ComputeDistinctiveDescriptors()
 {
     // Retrieve all observed descriptors
@@ -333,12 +411,23 @@ void MapPoint::ComputeDistinctiveDescriptors()
     }
 }
 
+/**
+ This method returns the unique descriptor of the mappoint.
+
+ @return The unique descriptor.
+ */
 cv::Mat MapPoint::GetDescriptor()
 {
     unique_lock<mutex> lock(mMutexFeatures);
     return mDescriptor.clone();
 }
 
+/**
+ This method return the index of the mappoint in the given keyframe if the mappoint exists within keyframe.
+
+ @param pKF - The point keyframe.
+ @return The index of the mappoint in the given keyframe. Else it returns a -1, when the mappoint is not found in the keyframe.
+ */
 int MapPoint::GetIndexInKeyFrame(KeyFrame *pKF)
 {
     unique_lock<mutex> lock(mMutexFeatures);
@@ -348,12 +437,21 @@ int MapPoint::GetIndexInKeyFrame(KeyFrame *pKF)
         return -1;
 }
 
+/**
+ This method returns a boolean if the mappoint is in the keyframe.
+
+ @param pKF - The point key frame.
+ @return True if the mappoint is found within the keyframe. False if the mappoint is not found within the keyframe.
+ */
 bool MapPoint::IsInKeyFrame(KeyFrame *pKF)
 {
     unique_lock<mutex> lock(mMutexFeatures);
     return (mObservations.count(pKF));
 }
 
+/**
+ This method updates the normal based on the camera center of the associated keyframes. The depth is updated by the scale; max- and min distance are calculated based on the scalefactor and the distance.
+ */
 void MapPoint::UpdateNormalAndDepth()
 {
     map<KeyFrame*,size_t> observations;
@@ -397,18 +495,35 @@ void MapPoint::UpdateNormalAndDepth()
     }
 }
 
+/**
+ This method return the minimum distance invariance, this is 80% of the minimum distance.
+
+ @return The minimum distance invariance.
+ */
 float MapPoint::GetMinDistanceInvariance()
 {
     unique_lock<mutex> lock(mMutexPos);
     return 0.8f*mfMinDistance;
 }
 
+/**
+ This method return the maximum distance invariance, this is 120% of the maximum distance.
+
+ @return The maximum distance invariance.
+ */
 float MapPoint::GetMaxDistanceInvariance()
 {
     unique_lock<mutex> lock(mMutexPos);
     return 1.2f*mfMaxDistance;
 }
 
+/**
+ This method predicts the scale of the image in a keyframe by dividing the maximum distance of mappoint with the current distance of the given distance.
+
+ @param currentDist - This is the current distance
+ @param pKF - The point keyframe
+ @return Returns the predicted scale of the maximum distance of the keyframe divided by the current distance.
+ */
 int MapPoint::PredictScale(const float &currentDist, KeyFrame* pKF)
 {
     float ratio;
@@ -426,6 +541,13 @@ int MapPoint::PredictScale(const float &currentDist, KeyFrame* pKF)
     return nScale;
 }
 
+/**
+ This method predicts the scale of the image in a frame by dividing the maximum distance of mappoint with the current distance of the given distance.
+
+ @param currentDist This is the current distance
+ @param pF - The point frame
+ @return Returns the predicted scale of the maximum distance of the frame divided by the current distance.
+ */
 int MapPoint::PredictScale(const float &currentDist, Frame* pF)
 {
     float ratio;
