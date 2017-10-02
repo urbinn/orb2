@@ -541,7 +541,7 @@ void System::SaveMapPointsToCSV(const string &filename) {
     vector<MapPoint *> mapPoints = mpMap->GetAllMapPoints();
     
     string localString = filename;
-    localString.append(".txt");
+    localString.append(".csv");
     
     ofstream f;
     f.open(localString.c_str());
