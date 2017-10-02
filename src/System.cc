@@ -345,6 +345,7 @@ void System::Shutdown()
         pangolin::BindToContext("ORB-SLAM2: Map Viewer");
     if (is_save_map)
         SaveMap(mapfile);
+        SaveMapPointsToCSV(mapfile);
 }
 
 void System::SaveTrajectoryTUM(const string &filename)
@@ -519,9 +520,10 @@ vector<cv::KeyPoint> System::GetTrackedKeyPointsUn()
 
 void System::SaveMap(const string &filename)
 {
-    std::ofstream out(filename, std::ios_base::binary);
-    if (!out)
-    {
+    string localString = filename;
+    localString.append(".bin");
+    std::ofstream out(localString, std::ios_base::binary);
+    if (!out) {
         cerr << "Cannot Write to Mapfile: " << mapfile << std::endl;
         exit(-1);
     }
@@ -532,6 +534,30 @@ void System::SaveMap(const string &filename)
     cout << " ...done" << std::endl;
     out.close();
 }
+    
+void System::SaveMapPointsToCSV(const string &filename) {
+    cout << endl << "Saving mapoints to " << filename << " ..." << endl;
+    
+    vector<MapPoint *> mapPoints = mpMap->GetAllMapPoints();
+    
+    string localString = filename;
+    localString.append(".csv");
+    
+    ofstream f;
+    f.open(localString.c_str());
+    f << fixed;
+    
+    f << "x, y, z" << endl;
+    
+    for(auto mapPoint : mapPoints) {
+        f << mapPoint->GetWorldPos().at<float>(0) << "," << mapPoint->GetWorldPos().at<float>(1)  << "," << mapPoint->GetWorldPos().at<float>(2) << endl;
+        
+    }
+    
+    f.close();
+    cout << endl << "Mappoints saved!" << endl;
+}
+    
 bool System::LoadMap(const string &filename)
 {
     std::ifstream in(filename, std::ios_base::binary);
