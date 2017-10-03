@@ -29,11 +29,22 @@ using namespace std;
 namespace ORB_SLAM2
 {
 
+/**
+ Initializer of the KeyFrameDatabase
+
+ @param voc - The ORBVocabulary of the type TemplatedVocabulary which have a key of TDescriptor and value of FORB.
+ @return This returns the initialized KeyFrameDatabase file resized to the size of the orb vocabulary.
+ */
 KeyFrameDatabase::KeyFrameDatabase(ORBVocabulary *voc) : mpVoc(voc)
 {
     mvInvertedFile.resize(voc->size());
 }
 
+/**
+ The keyframe is added to the inverted file for every descriptor of the keyframe.
+
+ @param pKF - The point key frame
+ */
 void KeyFrameDatabase::add(KeyFrame *pKF)
 {
     unique_lock<mutex> lock(mMutex);
@@ -42,6 +53,11 @@ void KeyFrameDatabase::add(KeyFrame *pKF)
         mvInvertedFile[vit->first].push_back(pKF);
 }
 
+/**
+ This method erases the elements in the inverted file for the entry by iterating over every descriptor of the keyframe.
+
+ @param pKF - The point keyframe
+ */
 void KeyFrameDatabase::erase(KeyFrame *pKF)
 {
     unique_lock<mutex> lock(mMutex);
@@ -63,16 +79,25 @@ void KeyFrameDatabase::erase(KeyFrame *pKF)
     }
 }
 
+
 /**
- * 
- * 
- */ 
+ This method clears the inverted file and resizes the inverted file to the associated vocabulary file.
+ */
 void KeyFrameDatabase::clear()
 {
     mvInvertedFile.clear();
     mvInvertedFile.resize(mpVoc->size());
 }
 
+/**
+ This method first searches all the keyframe that share a word with the current keyframers. It also discards keyframe which are connected to the query keyframe.
+ Then it compares only the keyframe which share enough words. It also computes the similarity score and retains the matches whose score is higher than the minimal score.
+ When the comparison is done the score is accumulated by covisibility. Finally it returns all the keyframes with a score higher than 0.75 * best score.
+
+ @param pKF - The given point keyframe
+ @param minScore - The lowest score to a connected keyframe in the covisiblity graph.
+ @return Returns a list of keyframes that are used to detect loop closure.
+ */
 vector<KeyFrame *> KeyFrameDatabase::DetectLoopCandidates(KeyFrame *pKF, float minScore)
 {
     set<KeyFrame *> spConnectedKeyFrames = pKF->GetConnectedKeyFrames();
@@ -195,6 +220,14 @@ vector<KeyFrame *> KeyFrameDatabase::DetectLoopCandidates(KeyFrame *pKF, float m
     return vpLoopCandidates;
 }
 
+/**
+ This method searched all the keyframes that share a word with the current frame. Then it only compares those keyframes that share enough words. After the comparison
+ it computes the similarity score. When the computation is done, the score is accumulated by covisiblity. Finally it returns all those keyframe with a score higher
+ than 0.75 * the best score. This method is used when the tracking is lost.
+
+ @param F - The current frame.
+ @return It returns a list of keyframes which are candidates for relocalization.
+ */
 vector<KeyFrame *> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
 {
     list<KeyFrame *> lKFsSharingWords;
