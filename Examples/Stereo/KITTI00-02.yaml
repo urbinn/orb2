@@ -66,4 +66,4 @@ Viewer.ViewpointF: 2000
 
 # Map Parameters
 #---------------------------------------------
-Map.mapfile: /home/14102307/orb2/Examples/Stereo/Map
+Map.mapfile: /data/urbinn/orb2/Examples/Stereo/Map
