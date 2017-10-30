@@ -31,6 +31,9 @@
 
 #include <mutex>
 #include "BoostArchiver.h"
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/foreach.hpp>
 
 namespace ORB_SLAM2
 {
