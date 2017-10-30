@@ -954,5 +954,410 @@ void KeyFrame::serialize(Archive &ar, const unsigned int version)
 }
 template void KeyFrame::serialize(boost::archive::binary_iarchive&, const unsigned int);
 template void KeyFrame::serialize(boost::archive::binary_oarchive&, const unsigned int);
+    
+    
+    //XML
+    boost::property_tree::ptree* KeyFrame::propertyTreeFromKeyframe( std::map<KeyFrame* , boost::property_tree::ptree*> *referenceKeyFrames) {
+        
+        //KeyFrame reference
+        //If KeyFrame is already in the XML store the mnId
+        std::map<KeyFrame* , boost::property_tree::ptree*>::iterator it = referenceKeyFrames->find(this);
+        if(it != referenceKeyFrames->end())
+        {
+            boost::property_tree::ptree  * keyframeTreeReturn = new boost::property_tree::ptree;
+            keyframeTreeReturn->put("mnId", mnId);
+            return keyframeTreeReturn;
+        }
+        
+        
+        boost::property_tree::ptree  * keyframeTree = new boost::property_tree::ptree;
+        referenceKeyFrames->insert( std::pair<KeyFrame* , boost::property_tree::ptree*>(this,keyframeTree) );
+        
+        keyframeTree->put("nNextId", nNextId);
+        keyframeTree->put("mnId", mnId);
+        keyframeTree->put("mnFrameId", const_cast<long unsigned int &>(mnFrameId) );
+        keyframeTree->put("mTimeStamp", const_cast<double &>(mTimeStamp) );
+        
+        keyframeTree->put("mnGridCols", const_cast<int &>(mnGridCols) );
+        keyframeTree->put("mnGridRows", const_cast<int &>(mnGridRows) );
+        
+        keyframeTree->put("mfGridElementWidthInv", const_cast<float &>(mfGridElementWidthInv));
+        keyframeTree->put("mfGridElementHeightInv", const_cast<float &>(mfGridElementHeightInv));
+        
+        keyframeTree->put("mnTrackReferenceForFrame", (mnTrackReferenceForFrame));
+        keyframeTree->put("mnFuseTargetForKF",(mnFuseTargetForKF));
+        
+        keyframeTree->put("mnBALocalForKF",(mnBALocalForKF));
+        keyframeTree->put("mnBAFixedForKF",(mnBAFixedForKF));
+        
+        keyframeTree->put("mnLoopQuery",(mnLoopQuery));
+        keyframeTree->put("mnLoopWords",(mnLoopWords));
+        keyframeTree->put("mLoopScore",(mLoopScore));
+        keyframeTree->put("mnRelocQuery",(mnRelocQuery));
+        keyframeTree->put("mnRelocWords",(mnRelocWords));
+        keyframeTree->put("mRelocScore",(mRelocScore));
+        
+        keyframeTree->add_child("mTcwGBA",  propertyTreeFromMatrix(mTcwGBA) );
+        keyframeTree->add_child("mTcwBefGBA",  propertyTreeFromMatrix(mTcwBefGBA) );
+        keyframeTree->put("mnBAGlobalForKF", (mnBAGlobalForKF) );
+        
+        keyframeTree->put("mTcwGBA",(mTcwGBA));
+        keyframeTree->put("mTcwBefGBA",(mTcwBefGBA));
+        keyframeTree->put("mnBAGlobalForKF",(mnBAGlobalForKF));
+        
+        keyframeTree->put("fx",(fx));
+        keyframeTree->put("fy",(fy));
+        keyframeTree->put("cx",(cx));
+        keyframeTree->put("cy",(cy));
+        
+        keyframeTree->put("invfx",(invfx));
+        keyframeTree->put("invfy",(invfy));
+        keyframeTree->put("mbf",(mbf));
+        
+        keyframeTree->put("mb",(mb));
+        keyframeTree->put("mThDepth",(mThDepth));
+        
+        keyframeTree->put("N",(const_cast<int &>(N)));
+        
+        
+        //keypoints mvKeys
+        boost::property_tree::ptree mvKeysTree;
+        
+        for(auto key : mvKeys) {
+            boost::property_tree::ptree keypointTree;
+            keypointTree.put("x", key.pt.x  );
+            keypointTree.put("y", key.pt.y  );
+            mvKeysTree.push_back(boost::property_tree::ptree::value_type("KeyPoint", keypointTree));
+        }
+        
+        //add keypoints to mvKeys tree
+        keyframeTree->add_child("mvKeys", mvKeysTree);
+        
+        
+        //keypoints mvKeysUn
+        boost::property_tree::ptree mvKeysUnTree;
+        
+        for(auto key : mvKeysUn) {
+            boost::property_tree::ptree keypointTree;
+            keypointTree.put("x", key.pt.x  );
+            keypointTree.put("y", key.pt.y  );
+            mvKeysUnTree.push_back(boost::property_tree::ptree::value_type("KeyPoint", keypointTree));
+        }
+        
+        //add keypoints to mvKeys tree
+        keyframeTree->add_child("mvKeysUn", mvKeysUnTree);
+        
+        
+        
+        //mvuRight
+        boost::property_tree::ptree mvuRightTree;
+        for(auto floatValue : mvuRight) {
+            boost::property_tree::ptree localValue;
+            localValue.put_value(floatValue);
+            mvuRightTree.push_back(boost::property_tree::ptree::value_type("float", localValue));
+        }
+        
+        //add float to mvuRight tree
+        keyframeTree->add_child("mvuRight", mvuRightTree);
+        
+        
+        //mvDepth
+        boost::property_tree::ptree mvDepthTree;
+        for(auto floatValue : mvDepth) {
+            boost::property_tree::ptree localValue;
+            localValue.put_value(floatValue);
+            mvDepthTree.push_back(boost::property_tree::ptree::value_type("float", localValue));
+        }
+        
+        //add float to mvuRight tree
+        keyframeTree->add_child("mvDepth", mvDepthTree);
+        
+        
+        
+        
+        //dDescriptors
+        keyframeTree->add_child("mDescriptors",  propertyTreeFromMatrix(mDescriptors) );
+        
+        // Bow
+        keyframeTree->add_child("mBowVec",  propertyTreeFromBowVector(mBowVec) );
+        keyframeTree->add_child("mFeatVec",  propertyTreeFromFeatureVector(mFeatVec) );
+        
+        // Pose relative to parent
+        keyframeTree->add_child("mFeatVec",  propertyTreeFromMatrix(mTcp) );
+        
+        
+        
+        
+        // Scale related
+        keyframeTree->put("mnScaleLevels",(const_cast<int &>(mnScaleLevels)));
+        keyframeTree->put("mfScaleFactor", const_cast<float &>(mfScaleFactor));
+        keyframeTree->put("mfLogScaleFactor", const_cast<float &>(mfLogScaleFactor));
+        
+        
+        //mvScaleFactors
+        boost::property_tree::ptree mvScaleFactorsTree;
+        for(auto floatValue : mvScaleFactors) {
+            boost::property_tree::ptree localValue;
+            localValue.put_value(const_cast<float &>(floatValue));
+            mvScaleFactorsTree.push_back(boost::property_tree::ptree::value_type("float", localValue));
+        }
+        
+        //add float to mvuRight tree
+        keyframeTree->add_child("mvScaleFactors", mvScaleFactorsTree);
+        
+        
+        
+        //mvLevelSigma2
+        boost::property_tree::ptree mvLevelSigma2Tree;
+        for(auto floatValue : mvLevelSigma2) {
+            boost::property_tree::ptree localValue;
+            localValue.put_value(const_cast<float &>(floatValue));
+            mvLevelSigma2Tree.push_back(boost::property_tree::ptree::value_type("float", localValue));
+        }
+        
+        //add float to mvuRight tree
+        keyframeTree->add_child("mvLevelSigma2", mvLevelSigma2Tree);
+        
+        
+        
+        //mvLevelSigma2
+        boost::property_tree::ptree mvInvLevelSigma2Tree;
+        for(auto floatValue : mvInvLevelSigma2) {
+            boost::property_tree::ptree localValue;
+            localValue.put_value(const_cast<float &>(floatValue));
+            mvInvLevelSigma2Tree.push_back(boost::property_tree::ptree::value_type("float", localValue));
+        }
+        
+        //add float to mvuRight tree
+        keyframeTree->add_child("mvInvLevelSigma2", mvInvLevelSigma2Tree);
+        
+        
+        
+        // Image bounds and calibration
+        keyframeTree->put("mnMinX", const_cast<int &>(mnMinX));
+        keyframeTree->put("mnMinY",  const_cast<int &>(mnMinY)  );
+        keyframeTree->put("mnMaxX",  const_cast<int &>(mnMaxX) );
+        keyframeTree->put("mnMaxY",  const_cast<int &>(mnMaxY) );
+        
+        
+        keyframeTree->add_child("mK",  propertyTreeFromMatrix(mK) );
+        
+        // mutex needed vars, but don't lock mutex in the save/load procedure
+        {
+            unique_lock<mutex> lock_pose(mMutexPose);
+            keyframeTree->add_child("Tcw",  propertyTreeFromMatrix(Tcw) );
+            keyframeTree->add_child("Twc",  propertyTreeFromMatrix(Twc) );
+            keyframeTree->add_child("Ow",  propertyTreeFromMatrix(Ow) );
+            keyframeTree->add_child("Cw",  propertyTreeFromMatrix(Cw) );
+        }
+        {
+            unique_lock<mutex> lock_feature(mMutexFeatures);
+            
+            
+            
+            //mappoints
+            
+            //TODO: needs to save size of array ??
+            boost::property_tree::ptree mvpMapPointsTree;
+            for(auto mapPoint : mvpMapPoints) {
+                if (mapPoint != nullptr) {
+                    boost::property_tree::ptree mapPointLocal;
+                    mapPointLocal.put("x", mapPoint->GetWorldPos().at<float>(0)  );
+                    mapPointLocal.put("y", mapPoint->GetWorldPos().at<float>(1) );
+                    mapPointLocal.put("z", mapPoint->GetWorldPos().at<float>(2) );
+                    
+                    mvpMapPointsTree.push_back(boost::property_tree::ptree::value_type("mappoint", mapPointLocal));
+                }
+                
+            }
+            
+            //add mappoints to map tree
+            keyframeTree->add_child("mvpMapPoints", mvpMapPointsTree);
+        }
+        
+        
+        //        // BoW
+        //        ar & mpKeyFrameDB;
+        //        // mpORBvocabulary restore elsewhere(see SetORBvocab)
+        {
+            //            // Grid related
+            unique_lock<mutex> lock_connection(mMutexConnections);
+            
+            //mGrid
+            boost::property_tree::ptree baseArrayTree;
+            for (int i = 0; i < mGrid.size(); i++) {
+                boost::property_tree::ptree arrayTree;
+                for (int j = 0; j < (mGrid[i].size()); j++) {
+                    boost::property_tree::ptree innerArrayTree;
+                    for (int k = 0; k < (mGrid[i][j].size()); k++) {
+                        if (!mGrid[i][j][k]) {
+                            boost::property_tree::ptree localValue;
+                            localValue.put_value( (mGrid[i][j][k]) );
+                            innerArrayTree.push_back(boost::property_tree::ptree::value_type("float", localValue));
+                        }
+                    }
+                    arrayTree.push_back(boost::property_tree::ptree::value_type("array", innerArrayTree));
+                }
+                baseArrayTree.push_back(boost::property_tree::ptree::value_type("baseArray", arrayTree));
+            }
+            keyframeTree->push_back(boost::property_tree::ptree::value_type("mGrid", baseArrayTree));
+            
+            
+            //mConnectedKeyFrameWeights
+            boost::property_tree::ptree mConnectedKeyFrameWeightsTree;
+            for (auto const& valueMConnectedKeyFrameWeights : mConnectedKeyFrameWeights)
+            {
+                boost::property_tree::ptree localValue;
+                localValue.push_back(boost::property_tree::ptree::value_type("KeyFrame",  *valueMConnectedKeyFrameWeights.first->propertyTreeFromKeyframeId()  ) );
+                localValue.put("weight",  valueMConnectedKeyFrameWeights.second );
+                mConnectedKeyFrameWeightsTree.push_back(boost::property_tree::ptree::value_type("ConnectedKeyFrameWeight", localValue));
+            }
+            keyframeTree->push_back(boost::property_tree::ptree::value_type("mConnectedKeyFrameWeights", mConnectedKeyFrameWeightsTree));
+            
+            
+            //mvpOrderedConnectedKeyFrames
+            boost::property_tree::ptree mvpOrderedConnectedKeyFramesTree;
+            for (auto const& valuemvpOrderedConnectedKeyFrames : mvpOrderedConnectedKeyFrames)
+            {
+                boost::property_tree::ptree localValue;
+                localValue.push_back(boost::property_tree::ptree::value_type("KeyFrame",  *valuemvpOrderedConnectedKeyFrames->propertyTreeFromKeyframeId()  ) );
+                mvpOrderedConnectedKeyFramesTree.push_back(boost::property_tree::ptree::value_type("mvpOrderedConnectedKeyFrame", localValue));
+            }
+            keyframeTree->push_back(boost::property_tree::ptree::value_type("mvpOrderedConnectedKeyFrames", mvpOrderedConnectedKeyFramesTree));
+            
+            
+            //mvOrderedWeights
+            boost::property_tree::ptree  mvOrderedWeightsTree;
+            for (auto const& mvOrderedWeightsValue : mvOrderedWeights)
+            {
+                boost::property_tree::ptree localValue;
+                localValue.put("int",  mvOrderedWeightsValue  );
+                mvOrderedWeightsTree.push_back(boost::property_tree::ptree::value_type("mvOrderedWeight", localValue));
+            }
+            keyframeTree->push_back(boost::property_tree::ptree::value_type("mvOrderedWeights", mvOrderedWeightsTree));
+            
+            // Spanning Tree and Loop Edges
+            keyframeTree->put("mbFirstConnection",(mbFirstConnection));
+            
+            if (mpParent == nullptr) {
+                boost::property_tree::ptree localValue;
+                localValue.put("mspLoopEdge", "NULL");
+                keyframeTree->push_back(boost::property_tree::ptree::value_type("mpParent.KeyFrame",(   localValue )));
+            } else {
+                keyframeTree->push_back(boost::property_tree::ptree::value_type( "mpParent.KeyFrame",*(mpParent->propertyTreeFromKeyframeId()  ) ) ) ;
+            }
+            
+            
+            //mspChildrens
+            boost::property_tree::ptree mspChildrensTree;
+            for (auto const& mspChildrensValue : mspChildrens)
+            {
+                boost::property_tree::ptree localValue;
+                localValue.push_back(boost::property_tree::ptree::value_type("KeyFrame",  *mspChildrensValue->propertyTreeFromKeyframeId()  ) );
+                mspChildrensTree.push_back(boost::property_tree::ptree::value_type("mspChildren", localValue));
+            }
+            keyframeTree->push_back(boost::property_tree::ptree::value_type("mspChildrens", mspChildrensTree));
+            
+            
+            //mspLoopEdges
+            boost::property_tree::ptree mspLoopEdgesTree;
+            for (auto const& mspLoopEdgesValue : mspLoopEdges)
+            {
+                boost::property_tree::ptree localValue;
+                localValue.push_back(boost::property_tree::ptree::value_type("KeyFrame",  *mspLoopEdgesValue->propertyTreeFromKeyframeId()  ) );
+                mspLoopEdgesTree.push_back(boost::property_tree::ptree::value_type("mspLoopEdge", localValue));
+            }
+            keyframeTree->push_back(boost::property_tree::ptree::value_type("mspLoopEdges", mspLoopEdgesTree));
+            
+            
+            // Bad flags
+            keyframeTree->put("mbNotErase",(mbNotErase));
+            keyframeTree->put("mbToBeErased",(mbToBeErased));
+            keyframeTree->put("mbBad",(mbBad));
+            keyframeTree->put("mHalfBaseline",(mHalfBaseline));
+        }
+        
+        
+        //TODO: Map Points
+        //        ar & mpMap;
+        
+        return keyframeTree;
+    }
+    
+    boost::property_tree::ptree* KeyFrame::propertyTreeFromKeyframeId() {
+        boost::property_tree::ptree  * keyframeTreeReturn = new boost::property_tree::ptree;
+        keyframeTreeReturn->put("mnId", mnId);
+        return keyframeTreeReturn;
+    }
+    
+    boost::property_tree::ptree  KeyFrame::propertyTreeFromMatrix(cv::Mat const matrix) {
+        boost::property_tree::ptree matrixTree;
+        
+        matrixTree.put("rows", matrix.rows );
+        matrixTree.put("cols", matrix.cols );
+        
+        boost::property_tree::ptree valuesTree;
+        
+        //        cv::MatConstIterator_<double> _it = matrix.begin<double>();
+        //        for(;_it!=matrix.end<double>(); _it++){
+        for (float &f : cv::Mat_<float>(matrix)) {
+            boost::property_tree::ptree localValue;
+            localValue.put_value(f);
+            valuesTree.push_back(boost::property_tree::ptree::value_type("float", localValue));
+        }
+        matrixTree.push_back(boost::property_tree::ptree::value_type("Data", valuesTree));
+        
+        return matrixTree;
+    }
+    
+    boost::property_tree::ptree  KeyFrame::propertyTreeFromBowVector(DBoW2::BowVector const vector) {
+        boost::property_tree::ptree matrixTree;
+        
+        boost::property_tree::ptree valuesTree;
+        
+        for ( const auto bowValue : vector )
+        {
+            boost::property_tree::ptree localValue;
+            localValue.put_value(bowValue.first);
+            
+            boost::property_tree::ptree localValueDouble;
+            localValueDouble.put_value(bowValue.second);
+            
+            valuesTree.push_back(boost::property_tree::ptree::value_type("int",  localValue));
+            valuesTree.push_back(boost::property_tree::ptree::value_type("double", localValueDouble));
+        }
+        
+        matrixTree.push_back(boost::property_tree::ptree::value_type("map", valuesTree));
+        
+        return matrixTree;
+    }
+    
+    
+    boost::property_tree::ptree  KeyFrame::propertyTreeFromFeatureVector(DBoW2::FeatureVector const vector) {
+        boost::property_tree::ptree matrixTree;
+        
+        boost::property_tree::ptree valuesTree;
+        
+        for ( const  auto  bowValue : vector ) {
+            boost::property_tree::ptree localValue;
+            localValue.put_value(bowValue.first);
+            
+            boost::property_tree::ptree valuesTreeInner;
+            for ( const int  bowArrayValue : bowValue.second ) {
+                boost::property_tree::ptree localValueDouble;
+                localValueDouble.put_value(bowArrayValue);
+                
+                valuesTreeInner.push_back(boost::property_tree::ptree::value_type("intVector",  localValueDouble));
+            }
+            
+            
+            valuesTree.push_back(boost::property_tree::ptree::value_type("int",  localValue));
+            valuesTree.push_back(boost::property_tree::ptree::value_type("array", valuesTreeInner));
+        }
+        
+        matrixTree.push_back(boost::property_tree::ptree::value_type("map", valuesTree));
+        
+        return matrixTree;
+    }
 
 } //namespace ORB_SLAM

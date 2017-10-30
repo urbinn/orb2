@@ -121,6 +121,14 @@ public:
     // for serialization
     KeyFrame(); // Default constructor for serialization, need to deal with const member
     void SetORBvocabulary(ORBVocabulary *porbv) {mpORBvocabulary=porbv;}
+    
+    boost::property_tree::ptree* propertyTreeFromKeyframe(std::map<KeyFrame* , boost::property_tree::ptree*> *referenceKeyFrames);
+
+    boost::property_tree::ptree* propertyTreeFromKeyframeId() ;
+
+    static boost::property_tree::ptree  propertyTreeFromMatrix(cv::Mat const matrix) ;
+    static boost::property_tree::ptree propertyTreeFromBowVector(DBoW2::BowVector const vector);
+    static boost::property_tree::ptree  propertyTreeFromFeatureVector (DBoW2::FeatureVector const vector) ;
 private:
     // serialize is recommended to be private
     friend class boost::serialization::access;

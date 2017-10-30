@@ -126,6 +126,7 @@ private:
     void SaveMap(const string &filename);
     bool LoadMap(const string &filename);
     void SaveMapPointsToCSV(const string &filename);
+    bool SaveMapForXML(const string &filename);
 
 private:
 

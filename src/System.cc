@@ -346,6 +346,7 @@ void System::Shutdown()
     if (is_save_map)
         SaveMap(mapfile);
         SaveMapPointsToCSV(mapfile);
+         SaveMapForXML(mapfile);
 }
 
 void System::SaveTrajectoryTUM(const string &filename)
@@ -582,5 +583,52 @@ bool System::LoadMap(const string &filename)
     in.close();
     return true;
 }
+    
+    
+    bool System::SaveMapForXML(const string &filename) {
+        
+        //refrence keyframe and id
+        std::map< KeyFrame* , ptree* > * storeKeyFrames = new std::map<KeyFrame* ,ptree* >();
+        
+        vector<MapPoint *> mapPoints = mpMap->GetAllMapPoints();
+        
+        ptree pt;
+        
+        string localStringTXT = filename;
+        localStringTXT.append("XML.txt");
+        
+        //map -> attributes
+        ptree mapTree;
+        
+        
+        ptree keyframeTree;
+        
+        for(auto keyframe :  mpMap->GetAllKeyFrames()  ) {
+            keyframeTree.push_back( ptree::value_type("KeyFrame", *keyframe->propertyTreeFromKeyframe(storeKeyFrames) ));
+        }
+        mapTree.add_child("KeyFrames", keyframeTree);
+        
+        
+        //map -> mappoints
+        ptree mapPointsTree;
+        
+        for(auto mapPoint : mapPoints) {
+            ptree mapPointLocal;
+            mapPointLocal.put("x", mapPoint->GetWorldPos().at<float>(0));
+            mapPointLocal.put("y", mapPoint->GetWorldPos().at<float>(1));
+            mapPointLocal.put("z", mapPoint->GetWorldPos().at<float>(2));
+            
+            mapPointsTree.push_back(ptree::value_type("mappoint", mapPointLocal));
+        }
+        
+        //add mappoints to map tree
+        mapTree.add_child("mappoints", mapPointsTree);
+        
+        
+        //output file
+        write_xml(localStringTXT, mapTree, std::locale(), boost::property_tree::xml_writer_make_settings<boost::property_tree::ptree::key_type>(' ', 1u));
+        
+        return true;
+    }
 
 } //namespace ORB_SLAM
