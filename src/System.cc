@@ -354,7 +354,7 @@ void System::Shutdown()
     if (is_save_map)
         SaveMap(mapfile);
         SaveMapPointsToCSV(mapfile);
-         SaveMapForXML(mapfile);
+        // SaveMapForXML(mapfile);
 }
 
 void System::SaveTrajectoryTUM(const string &filename)
@@ -569,7 +569,10 @@ void System::SaveMapPointsToCSV(const string &filename) {
     
 bool System::LoadMap(const string &filename)
 {
-    std::ifstream in(filename, std::ios_base::binary);
+    string localString = filename;
+    localString.append(".bin");
+
+    std::ifstream in(localString, std::ios_base::binary);
     if (!in)
     {
         cerr << "Cannot Open Mapfile: " << mapfile << " , Create a new one" << std::endl;
