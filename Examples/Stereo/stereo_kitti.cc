@@ -90,7 +90,7 @@ int main(int argc, char **argv)
         cv:mat framePose = SLAM.TrackStereo(imLeft,imRight,tframe);
 		//const char *path = "/home/14102307/PoseOfFRame.txt";
 		ofstream poseFrames;
-		poseFrames.open("/home/14102307/PoseOfFRame.txt"");
+		poseFrames.open("/home/14102307/PoseOfFRame.txt");
 		poseFrames << framePose;
 		poseFrames.close();
 		
