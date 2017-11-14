@@ -121,7 +121,10 @@ int main(int argc, char **argv)
 	ofstream poseFrames;
 	poseFrames.open("/home/14102307/PoseOfFrame.txt");
 	for (auto framePose : framePoseArray) {
-		poseFrames << framePose << endl;
+		for (auto matrixValue : framePose) 
+		{
+			poseFrames << matrixValue << ",";
+		poseFrames << endl;
 	}
 	poseFrames.close();
 
