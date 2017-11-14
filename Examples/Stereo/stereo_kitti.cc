@@ -36,11 +36,14 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
 
 int main(int argc, char **argv)
 {
-    if(argc != 4)
+    if(argc != 6)
     {
         cerr << endl << "Usage: ./stereo_kitti path_to_vocabulary path_to_settings path_to_sequence" << endl;
         return 1;
     }
+
+    auto showVisualization = (bool)atoi(argv[4]);
+    auto reusableMap = (bool)atoi(argv[5]);
 
     // Retrieve paths to images
     vector<string> vstrImageLeft;
@@ -51,7 +54,7 @@ int main(int argc, char **argv)
     const int nImages = vstrImageLeft.size();
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM2::System SLAM(argv[1],argv[2],ORB_SLAM2::System::STEREO,false);
+    ORB_SLAM2::System SLAM(argv[1],argv[2],ORB_SLAM2::System::STEREO,false, reusableMap);
 
     // Vector for tracking time statistics
     vector<float> vTimesTrack;
@@ -84,7 +87,12 @@ int main(int argc, char **argv)
 #endif
 
         // Pass the images to the SLAM system
-        SLAM.TrackStereo(imLeft,imRight,tframe);
+        cv:Mat FramePose = SLAM.TrackStereo(imLeft,imRight,tframe);
+		ofstream PoseFrames;
+		PoseFrames.open("PoseOfFRame.txt");
+		PoseFrames << FramePose;
+		PoseFrames.close();
+		
 
 #ifdef COMPILEDWITHC11
         std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
