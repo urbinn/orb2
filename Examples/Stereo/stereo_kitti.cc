@@ -67,7 +67,8 @@ int main(int argc, char **argv)
 
     // Main loop
     cv::Mat imLeft, imRight;
-    for(int ni=0; ni<nImages; ni++)
+	std::vector <cv::Mat> framePoseArray;
+    for(int ni=0; ni<40; ni++)
     {
         // Read left and right images from file
         imLeft = cv::imread(vstrImageLeft[ni],CV_LOAD_IMAGE_UNCHANGED);
@@ -89,12 +90,12 @@ int main(int argc, char **argv)
 
         // Pass the images to the SLAM system
         cv::Mat framePose = SLAM.TrackStereo(imLeft,imRight,tframe);
-		std::vector <cv::Mat> framePoseArray;
+		
 		framePoseArray.push_back(framePose);
-		ofstream poseFrames;
-		poseFrames.open("/home/14102307/PoseOfFame.txt");
-		poseFrames << framePoseArray;
-		poseFrames.close();
+		//ofstream poseFrames;
+	    //poseFrames.open("/home/14102307/PoseOfFame.txt");
+		//poseFrames << framePoseArray;
+		//poseFrames.close();
 		
 
 #ifdef COMPILEDWITHC11
@@ -117,6 +118,10 @@ int main(int argc, char **argv)
         if(ttrack<T)
             std::this_thread::sleep_for(std::chrono::microseconds(static_cast<size_t>((T-ttrack)*1e6)));
     }
+	ofstream poseFrames;
+	poseFrames.open("/home/14102307/PoseOfFame.txt");
+	poseFrames << framePoseArray;
+	poseFrames.close();
 
     // Stop all threads
     SLAM.Shutdown();
