@@ -88,9 +88,9 @@ int main(int argc, char **argv)
 
         // Pass the images to the SLAM system
         cv:mat framePose = SLAM.TrackStereo(imLeft,imRight,tframe);
-		const char *path = "/home/14102307/PoseOfFRame.txt";
-		ofstream poseFrames(path);
-		poseFrames.open("PoseOfFRame.txt");
+		//const char *path = "/home/14102307/PoseOfFRame.txt";
+		ofstream poseFrames;
+		poseFrames.open("/home/14102307/PoseOfFRame.txt"");
 		poseFrames << framePose;
 		poseFrames.close();
 		
