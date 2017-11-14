@@ -119,7 +119,7 @@ int main(int argc, char **argv)
             std::this_thread::sleep_for(std::chrono::microseconds(static_cast<size_t>((T-ttrack)*1e6)));
     }
 	ofstream poseFrames;
-	poseFrames.open("/home/14102307/PoseOfFame.txt");
+	poseFrames.open("/home/14102307/PoseOfFrame.txt");
 	for (auto framePose : framePoseArray) {
 		poseFrames << framePose << endl;
 	}
