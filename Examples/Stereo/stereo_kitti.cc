@@ -89,7 +89,7 @@ int main(int argc, char **argv)
 
         // Pass the images to the SLAM system
         cv::Mat framePose = SLAM.TrackStereo(imLeft,imRight,tframe);
-		std::vector<cv::Mat> framePoseArray = {}
+		std::vector <cv::Mat> framePoseArray;
 		framePoseArray.push_back(framePose);
 		ofstream poseFrames;
 		poseFrames.open("/home/14102307/PoseOfFame.txt");
