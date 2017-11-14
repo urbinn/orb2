@@ -22,6 +22,7 @@
 #include "Converter.h"
 #include "ORBmatcher.h"
 #include<mutex>
+#include <thread>
 
 namespace ORB_SLAM2
 {
@@ -116,8 +117,12 @@ KeyFrame get pose inverse
 */
 cv::Mat KeyFrame::GetPoseInverse()
 {
+    std::thread::id this_id = std::this_thread::get_id();
+    cout<<this_id<<endl
     unique_lock<mutex> lock(mMutexPose);
-    return Twc.clone();
+    cv::Mat clone =Twc.clone();
+    lock.unlock();
+    return clone;
 }
 
 /*

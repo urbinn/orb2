@@ -50,6 +50,7 @@ int main(int argc, char **argv)
     vector<string> vstrImageRight;
     vector<double> vTimestamps;
     cout<<"loading images"<<endl;
+    cout<<"fucker"<< string(argv[3])<<endl;
     LoadImages(string(argv[3]), vstrImageLeft, vstrImageRight, vTimestamps);
 
     const int nImages = vstrImageLeft.size();
@@ -135,6 +136,7 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
                 vector<string> &vstrImageRight, vector<double> &vTimestamps)
 {
     ifstream fTimes;
+    cout<<"loading Timestamps"<<endl;
     string strPathTimeFile = strPathToSequence + "/timestamps.txt";
     fTimes.open(strPathTimeFile.c_str());
     while(!fTimes.eof())
@@ -150,7 +152,7 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
             vTimestamps.push_back(t);
         }
     }
-
+    cout<<"adding left and right"<<endl;
     string strPrefixLeft = strPathToSequence + "/left";
     string strPrefixRight = strPathToSequence + "/right";
 
