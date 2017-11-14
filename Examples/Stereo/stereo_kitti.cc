@@ -120,7 +120,9 @@ int main(int argc, char **argv)
     }
 	ofstream poseFrames;
 	poseFrames.open("/home/14102307/PoseOfFame.txt");
-	poseFrames << framePoseArray;
+	for (auto framePose : framePoseArray) {
+		poseFrames << framePose << endl;
+	}
 	poseFrames.close();
 
     // Stop all threads
