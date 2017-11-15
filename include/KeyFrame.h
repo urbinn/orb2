@@ -35,19 +35,34 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/foreach.hpp>
 
+
+#include <boost/serialization/serialization.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/split_member.hpp>
+
 namespace ORB_SLAM2
 {
 
+struct id_map
+{
+	bool is_valid;
+	long unsigned int id;
+};
 class Map;
 class MapPoint;
 class Frame;
 class KeyFrameDatabase;
-
+struct id_map;
 class KeyFrame
 {
 public:
 
     KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB);
+
+     KeyFrame();	/* Default constructor for serialization */
 
     // Pose functions
     void SetPose(const cv::Mat &Tcw);
@@ -120,6 +135,13 @@ public:
     static bool lId(KeyFrame* pKF1, KeyFrame* pKF2){
         return pKF1->mnId<pKF2->mnId;
     }
+
+    void SetMap(Map* map);
+    	void SetKeyFrameDatabase(KeyFrameDatabase* pKeyFrameDB);
+    	void SetORBvocabulary(ORBVocabulary* pORBvocabulary);
+    	void SetMapPoints(std::vector<MapPoint*> spMapPoints);
+    	void SetSpanningTree(std::vector<KeyFrame*> vpKeyFrames);
+    	void SetGridParams(std::vector<KeyFrame*> vpKeyFrames);
 
 public:
     // for serialization
@@ -249,6 +271,20 @@ protected:
     float mHalfBaseline; // Only for visualization
 
     Map* mpMap;
+
+    friend class boost::serialization::access;
+     	template<class Archive>
+        void serialize(Archive & ar, const unsigned int version)
+    	{
+    		boost::serialization::split_member(ar, *this, version);
+    	}
+
+    	template<class Archive>
+    	void save(Archive & ar, const unsigned int version) const;
+
+
+    	template<class Archive>
+    	void load(Archive & ar, const unsigned int version);
 
     std::mutex mMutexPose;
     std::mutex mMutexConnections;

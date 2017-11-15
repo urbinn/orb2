@@ -101,6 +101,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
     //Create KeyFrame Database
     //Create the Map
+    /*
     if (!mapfile.empty() && LoadMap(mapfile))
     {
         bReuseMap = true;
@@ -110,6 +111,58 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
         mpKeyFrameDatabase = new KeyFrameDatabase(mpVocabulary);
         mpMap = new Map();
     }
+    */
+
+    //Create KeyFrame Database
+    mpKeyFrameDatabase = new KeyFrameDatabase(mpVocabulary);
+
+
+    if (!mapfile.empty() && LoadMap(mapfile))
+    {
+        bReuseMap = true;
+    }
+    else
+    {
+        mpMap = new Map();
+    }
+
+
+    	if (bReuseMap)
+    	{
+
+            vector<ORB_SLAM2::KeyFrame*> vpKFs = mpMap->GetAllKeyFrames();
+            for (vector<ORB_SLAM2::KeyFrame*>::iterator it = vpKFs.begin(); it != vpKFs.end(); ++it) {
+                (*it)->SetKeyFrameDatabase(mpKeyFrameDatabase);
+                (*it)->SetORBvocabulary(mpVocabulary);
+                (*it)->SetMap(mpMap);
+                (*it)->ComputeBoW();
+                mpKeyFrameDatabase->add(*it);
+                (*it)->SetMapPoints(mpMap->GetAllMapPoints());
+                (*it)->SetSpanningTree(vpKFs);
+                (*it)->SetGridParams(vpKFs);
+
+                // Reconstruct map points Observation
+
+            }
+
+            vector<ORB_SLAM2::MapPoint*> vpMPs = mpMap->GetAllMapPoints();
+            for (vector<ORB_SLAM2::MapPoint*>::iterator mit = vpMPs.begin(); mit != vpMPs.end(); ++mit) {
+                (*mit)->SetMap(mpMap);
+                (*mit)->SetObservations(vpKFs);
+
+            }
+
+            for (vector<ORB_SLAM2::KeyFrame*>::iterator it = vpKFs.begin(); it != vpKFs.end(); ++it) {
+                (*it)->UpdateConnections();
+            }
+
+
+    	}
+    	cout << endl << mpMap <<" : is the created map address" << endl;
+
+    	//end
+
+
 
     //Create Drawers. These are used by the Viewer
     mpFrameDrawer = new FrameDrawer(mpMap, bReuseMap);
@@ -530,6 +583,18 @@ vector<cv::KeyPoint> System::GetTrackedKeyPointsUn()
 
 void System::SaveMap(const string &filename)
 {
+
+        string localString = filename;
+        localString.append(".bin");
+        std::ofstream os(localString, std::ios_base::binary);
+        {
+            ::boost::archive::binary_oarchive oa(os, ::boost::archive::no_header);
+            //oa << mpKeyFrameDatabase;
+            oa << mpMap;
+        }
+        cout << endl << "Map saved to " << filename << endl;
+
+    /*
     string localString = filename;
     localString.append(".bin");
     std::ofstream out(localString, std::ios_base::binary);
@@ -543,6 +608,7 @@ void System::SaveMap(const string &filename)
     oa << mpKeyFrameDatabase;
     cout << " ...done" << std::endl;
     out.close();
+    */
 }
     
 void System::SaveMapPointsToCSV(const string &filename) {
@@ -570,6 +636,29 @@ void System::SaveMapPointsToCSV(const string &filename) {
     
 bool System::LoadMap(const string &filename)
 {
+
+        {
+            string localString = filename;
+            localString.append(".bin");
+//            std::ifstream is(filename);
+            std::ifstream is(localString, std::ios_base::binary);
+            if (!is) {
+                cerr << "Cannot Open Mapfile: " << mapfile << ", Create a new one" << std::endl;
+                return false;
+            }
+
+            boost::archive::binary_iarchive ia(is, boost::archive::no_header);
+            //ia >> mpKeyFrameDatabase;
+            ia >> mpMap;
+
+
+        }
+
+        cout << endl << filename <<" : Map Loaded!" << endl;
+        return true;
+
+
+    /*
     string localString = filename;
     localString.append(".bin");
 
@@ -600,6 +689,7 @@ bool System::LoadMap(const string &filename)
     cout << " ...done" << endl;
     in.close();
     return true;
+    */
 }
     
     
