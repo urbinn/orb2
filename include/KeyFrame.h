@@ -254,9 +254,12 @@ protected:
     // Grid over the image to speed up feature matching
     std::vector< std::vector <std::vector<size_t> > > mGrid;
 
-    std::map<KeyFrame*,int> mConnectedKeyFrameWeights;
-    std::vector<KeyFrame*> mvpOrderedConnectedKeyFrames;
-    std::vector<int> mvOrderedWeights;
+      std::map<KeyFrame*,int> mConnectedKeyFrameWeights;
+    		std::map<long unsigned int, int> 	   mConnectedKeyFrameWeights_nId;
+        std::vector<KeyFrame*> mvpOrderedConnectedKeyFrames;
+    		std::map<long unsigned int, id_map> 	mvpOrderedConnectedKeyFrames_nId;
+        std::vector<int> mvOrderedWeights;
+
 
     // Spanning Tree and Loop Edges
     bool mbFirstConnection;
