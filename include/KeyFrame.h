@@ -245,6 +245,7 @@ protected:
 
     // MapPoints associated to keypoints
     std::vector<MapPoint*> mvpMapPoints;
+    std::map<long unsigned int, id_map> mmMapPoints_nId;
 
     // BoW
     KeyFrameDatabase* mpKeyFrameDB;
