@@ -93,6 +93,9 @@ public:
     int PredictScale(const float &currentDist, Frame* pF);
 
 
+void SetMap(Map* map);
+	void SetObservations(std::vector<KeyFrame*>);
+
 private:
     // serialize is recommended to be private
     //friend class boost::serialization::access;
@@ -137,6 +140,7 @@ protected:
 
      // Keyframes observing the point and associated index in keyframe
      std::map<KeyFrame*,size_t> mObservations;
+     std::map<long unsigned int, size_t>  mObservations_nId;
 
      // Mean viewing direction
      cv::Mat mNormalVector;
@@ -163,6 +167,9 @@ protected:
 
      std::mutex mMutexPos;
      std::mutex mMutexFeatures;
+
+
+     std::pair<long unsigned int, bool> mref_KfId_pair;
 
       friend class boost::serialization::access;
       template<class Archive>

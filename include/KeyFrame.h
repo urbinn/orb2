@@ -146,7 +146,7 @@ public:
 public:
     // for serialization
     //KeyFrame(); // Default constructor for serialization, need to deal with const member
-    void SetORBvocabulary(ORBVocabulary *porbv) {mpORBvocabulary=porbv;}
+    //void SetORBvocabulary(ORBVocabulary *porbv) {mpORBvocabulary=porbv;}
     
     boost::property_tree::ptree* propertyTreeFromKeyframe(std::map<KeyFrame* , boost::property_tree::ptree*> *referenceKeyFrames);
 
@@ -157,9 +157,9 @@ public:
     static boost::property_tree::ptree  propertyTreeFromFeatureVector (DBoW2::FeatureVector const vector) ;
 private:
     // serialize is recommended to be private
-    friend class boost::serialization::access;
-    template<class Archive>
-    void serialize(Archive &ar, const unsigned int version);
+    //friend class boost::serialization::access;
+    //template<class Archive>
+    //void serialize(Archive &ar, const unsigned int version);
 
     // The following variables are accesed from only 1 thread or never change (no mutex needed).
 public:
