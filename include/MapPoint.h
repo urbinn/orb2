@@ -92,9 +92,7 @@ public:
     int PredictScale(const float &currentDist, KeyFrame*pKF);
     int PredictScale(const float &currentDist, Frame* pF);
 
-public:
-    // for serialization
-    MapPoint();
+
 private:
     // serialize is recommended to be private
     //friend class boost::serialization::access;
