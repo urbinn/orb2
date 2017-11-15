@@ -68,7 +68,7 @@ int main(int argc, char **argv)
     // Main loop
     cv::Mat imLeft, imRight;
 	std::vector <cv::Mat> framePoseArray;
-    for(int ni=0; ni<40; ni++)
+    for(int ni=0; ni<100; ni++)
     {
         // Read left and right images from file
         imLeft = cv::imread(vstrImageLeft[ni],CV_LOAD_IMAGE_UNCHANGED);
