@@ -116,14 +116,17 @@ KeyFrame get pose inverse
 @Return cv::Mat
 */
 cv::Mat KeyFrame::GetPoseInverse()
-{
-    std::thread::id this_id = std::this_thread::get_id();
-    cout<<this_id<<endl
-    unique_lock<mutex> lock(mMutexPose);
-    cv::Mat clone =Twc.clone();
-    lock.unlock();
-    return clone;
+{;
+       	 unique_lock<mutex> lock(mMutexPose);
+        cv::Mat clone =  Tcw.clone();
+        return clone;
 }
+
+cv::Mat KeyFrame::GetPoseInverseForMultiplication() {
+       unique_lock<mutex> lock(mMutexPose);
+	 return Twc;
+ }
+
 
 /*
 Get the camera centre mono

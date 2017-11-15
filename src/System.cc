@@ -26,6 +26,7 @@
 #include <pangolin/pangolin.h>
 #include <iomanip>
 
+
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/foreach.hpp>
@@ -573,7 +574,13 @@ bool System::LoadMap(const string &filename)
     localString.append(".bin");
 
     std::ifstream in(localString, std::ios_base::binary);
-    if (!in)
+
+   // if (!boost::filesystem::exists(localString)){
+     //	cout << "No such file" << endl;
+    //	return false;
+    //}
+
+    if (!in.good())
     {
         cerr << "Cannot Open Mapfile: " << mapfile << " , Create a new one" << std::endl;
         return false;
