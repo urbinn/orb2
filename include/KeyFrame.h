@@ -145,7 +145,7 @@ public:
 
 public:
     // for serialization
-    KeyFrame(); // Default constructor for serialization, need to deal with const member
+    //KeyFrame(); // Default constructor for serialization, need to deal with const member
     void SetORBvocabulary(ORBVocabulary *porbv) {mpORBvocabulary=porbv;}
     
     boost::property_tree::ptree* propertyTreeFromKeyframe(std::map<KeyFrame* , boost::property_tree::ptree*> *referenceKeyFrames);
