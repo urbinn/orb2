@@ -264,8 +264,11 @@ protected:
     // Spanning Tree and Loop Edges
     bool mbFirstConnection;
     KeyFrame* mpParent;
-    std::set<KeyFrame*> mspChildrens;
-    std::set<KeyFrame*> mspLoopEdges;
+   		id_map mparent_KfId_map;
+       std::set<KeyFrame*> mspChildrens;
+   		std::map<long unsigned int, id_map> 	   mmChildrens_nId;
+       std::set<KeyFrame*> mspLoopEdges;
+   		std::map<long unsigned int, id_map> 	   mmLoopEdges_nId;
 
     // Bad flags
     bool mbNotErase;
