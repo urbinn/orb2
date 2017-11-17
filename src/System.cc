@@ -540,7 +540,9 @@ void System::SaveMap(const string &filename)
     cout << "Saving Mapfile: " << mapfile << std::flush;
     boost::archive::binary_oarchive oa(out, boost::archive::no_header);
     oa << mpMap;
+    cout <<"map binary done" << std::endl;
     oa << mpKeyFrameDatabase;
+    cout<<"Keyframe binary done"<< std::endl;
     cout << " ...done" << std::endl;
     out.close();
 }
