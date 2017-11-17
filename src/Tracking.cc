@@ -487,7 +487,7 @@ void Tracking::Track()
     }
 
     // Store frame pose information to retrieve the complete camera trajectory afterwards.
-    if(!mCurrentFrame.mTcw.empty()  && mCurrentFrame.mpReferenceKF  )   
+    if(!mCurrentFrame.mTcw.empty()  && mCurrentFrame.mpReferenceKF && mCurrentFrame.mTcw.type() == mCurrentFrame.mpReferenceKF->GetPoseInverseForMultiplication().type()  )   
      {
         cv::Mat Tcr = mCurrentFrame.mTcw  * mCurrentFrame.mpReferenceKF->GetPoseInverseForMultiplication();
         mlRelativeFramePoses.push_back(Tcr);

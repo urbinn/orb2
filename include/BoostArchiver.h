@@ -26,7 +26,7 @@
 #include "Thirdparty/DBoW2/DBoW2/BowVector.h"
 #include "Thirdparty/DBoW2/DBoW2/FeatureVector.h"
 
-BOOST_SERIALIZATION_SPLIT_FREE(::cv::Mat)
+//BOOST_SERIALIZATION_SPLIT_FREE(::cv::Mat)
 namespace boost{
     namespace serialization {
 
@@ -55,7 +55,8 @@ namespace boost{
         ar & kf.pt.x;
         ar & kf.pt.y;
     }
-    /* serialization for CV Mat */
+    /* serialization for CV Mat */ 
+    /* 
     template<class Archive>
     void save(Archive &ar, const ::cv::Mat &m, const unsigned int file_version)
     {
@@ -63,7 +64,8 @@ namespace boost{
         if (!m.isContinuous())
             m_ = m.clone();
         size_t elem_size = m_.elemSize();
-        size_t elem_type = m_.type();
+        //size_t elem_type = m_.type();
+	size_t elem_type = m_.type();
         ar & m_.cols;
         ar & m_.rows;
         ar & elem_size;
@@ -89,6 +91,38 @@ namespace boost{
 
         ar & boost::serialization::make_array(m.ptr(), data_size);
     }
+    */
+    template<class Archive>
+void serialize(Archive &ar, cv::Mat& mat, const unsigned int)
+{
+    int cols, rows, type;
+    bool continuous;
+
+    if (Archive::is_saving::value) {
+        cols = mat.cols; rows = mat.rows; type = mat.type();
+        continuous = mat.isContinuous();
+    }
+
+    ar & cols & rows & type & continuous;
+
+    if (Archive::is_loading::value)
+        mat.create(rows, cols, type);
+
+    if (continuous) {
+        const unsigned int data_size = rows * cols * mat.elemSize();
+        ar & boost::serialization::make_array(mat.ptr(), data_size);
+    } else {
+        const unsigned int row_size = cols*mat.elemSize();
+        for (int i = 0; i < rows; i++) {
+            ar & boost::serialization::make_array(mat.ptr(i), row_size);
+        }
+    }
+
+}
+
+
+
+
     }
 }
 // TODO: boost::iostream zlib compressed binary format

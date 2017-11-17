@@ -848,8 +848,8 @@ cv::Mat KeyFrame::GetPoseInverse()
 }
 
 cv::Mat KeyFrame::GetPoseInverseForMultiplication() {
-       unique_lock<mutex> lock(mMutexPose);
-	 return Twc;
+      // unique_lock<mutex> lock(mMutexPose);
+	 return Twc.clone();
  }
 
 
