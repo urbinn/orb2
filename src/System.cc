@@ -456,7 +456,7 @@ void System::SaveTrajectoryTUM(const string &filename)
             Trw = Trw*pKF->mTcp;
             pKF = pKF->GetParent();
         }
-
+	
         Trw = Trw*pKF->GetPose()*Two;
 
         cv::Mat Tcw = (*lit)*Trw;
@@ -548,7 +548,7 @@ void System::SaveTrajectoryKITTI(const string &filename)
             Trw = Trw*pKF->mTcp;
             pKF = pKF->GetParent();
         }
-
+	if ( pKF != NULL) {
         Trw = Trw*pKF->GetPose()*Two;
 
         cv::Mat Tcw = (*lit)*Trw;
@@ -558,7 +558,8 @@ void System::SaveTrajectoryKITTI(const string &filename)
         f << setprecision(9) << Rwc.at<float>(0,0) << " " << Rwc.at<float>(0,1)  << " " << Rwc.at<float>(0,2) << " "  << twc.at<float>(0) << " " <<
              Rwc.at<float>(1,0) << " " << Rwc.at<float>(1,1)  << " " << Rwc.at<float>(1,2) << " "  << twc.at<float>(1) << " " <<
              Rwc.at<float>(2,0) << " " << Rwc.at<float>(2,1)  << " " << Rwc.at<float>(2,2) << " "  << twc.at<float>(2) << endl;
-    }
+}   
+ }
     f.close();
     cout << endl << "trajectory saved!" << endl;
 }
