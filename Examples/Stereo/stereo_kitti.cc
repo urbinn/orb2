@@ -118,14 +118,20 @@ int main(int argc, char **argv)
         if(ttrack<T)
             std::this_thread::sleep_for(std::chrono::microseconds(static_cast<size_t>((T-ttrack)*1e6)));
     }
+
+	//std::cout << "will set pose" <<  framePoseArray.size() << std::endl;
 	ofstream poseFrames;
-	poseFrames.open("/home/14102307/PoseOfFrame.txt");
+	poseFrames.open("/home/14055759/PoseOfFrame.csv");
 	for (auto framePose : framePoseArray) {
-		for (auto matrixValue : framePose)
-		{
-			poseFrames << matrixValue << ",";
-			poseFrames << endl;
+		for (float &f : cv::Mat_<float>(framePose)) {
+			 poseFrames << f  << "," ;
 		}
+		poseFrames << std::endl;
+		//for (auto matrixValue : framePose)
+		//{
+		//	poseFrames << matrixValue << ",";
+		//	poseFrames << endl;
+		//}
 	}
 	poseFrames.close();
 
