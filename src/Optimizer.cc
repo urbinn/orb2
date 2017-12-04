@@ -450,7 +450,7 @@ int Optimizer::PoseOptimization(Frame *pFrame)
     return nInitialCorrespondences-nBad;
 }
 
-void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool* pbStopFlag, Map* pMap)
+void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool* pbStopFlag, Map* pMap)// nos ta hanja un txt file e prome format : IDpoint u v Coordinaten first frame float=estimated distance u v frame 2.
 {    
     // Local KeyFrames: First Breath Search from Current Keyframe
     list<KeyFrame*> lLocalKeyFrames;
@@ -590,7 +590,8 @@ void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool* pbStopFlag, Map* pMap
             {                
                 const cv::KeyPoint &kpUn = pKFi->mvKeysUn[mit->second];
 
-                // Monocular observation
+                // Monocular observation.
+				// Keep this we will use mono for this.
                 if(pKFi->mvuRight[mit->second]<0)
                 {
                     Eigen::Matrix<double,2,1> obs;
@@ -619,6 +620,7 @@ void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool* pbStopFlag, Map* pMap
                     vpMapPointEdgeMono.push_back(pMP);
                 }
                 else // Stereo observation
+					// Kita esaki nos tahuza mono so.
                 {
                     Eigen::Matrix<double,3,1> obs;
                     const float kp_ur = pKFi->mvuRight[mit->second];

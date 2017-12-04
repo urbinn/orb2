@@ -68,7 +68,7 @@ int main(int argc, char **argv)
     // Main loop
     cv::Mat imLeft, imRight;
 	std::vector <cv::Mat> framePoseArray;
-    for(int ni=0; ni<100; ni++)
+    for(int ni=0; ni<5; ni++)
     {
         // Read left and right images from file
         imLeft = cv::imread(vstrImageLeft[ni],CV_LOAD_IMAGE_UNCHANGED);
@@ -121,7 +121,7 @@ int main(int argc, char **argv)
 
 	//std::cout << "will set pose" <<  framePoseArray.size() << std::endl;
 	ofstream poseFrames;
-	poseFrames.open("/home/14055759/PoseOfFrame.csv");
+	poseFrames.open("/home/14102307/PoseOfFrame.csv");
 	for (auto framePose : framePoseArray) {
 		for (float &f : cv::Mat_<float>(framePose)) {
 			 poseFrames << f  << "," ;
